@@ -1,15 +1,7 @@
-import os
-# Evita problemas de carga de la ventana gráfica en Windows
-os.environ['KIVY_WINDOW'] = 'sdl2'
-
 from kivymd.app import MDApp
 from kivy.lang import Builder
-from kivy.core.window import Window
 
-# Ajustamos el tamaño de la ventana para simular un celular
-Window.size = (360, 600)
-
-# --- DISEÑO DE LA INTERFAZ CON ESTILO CAPIBARA (Lenguaje KV) ---
+# --- DISEÑO DE LA INTERFAZ ESTILO CAPIBARA ---
 KV = '''
 MDScreen:
     md_bg_color: 0.38, 0.29, 0.21, 1  # Café Pelaje de Capibara Oscuro
@@ -18,10 +10,11 @@ MDScreen:
         orientation: 'vertical'
         padding: '15dp'
         spacing: '10dp'
+        size_hint: 1, 1  # Forzamos a que ocupe todo el ancho y alto del celular
 
-        # 1. IMAGEN DEL CAPIBARA
-        AsyncImage:
-            source: "https://www.shutterstock.com/shutterstock/photos/2536715087/display_1500/stock-vector-cute-capybara-character-funny-flat-animal-vector-tangerine-on-head-of-kawaii-capibara-isolated-2536715087.jpg"
+        # 1. IMAGEN DEL CAPIBARA (Local para evitar errores de internet)
+        Image:
+            source: "capibara.png"  # <- Guarda tu imagen en la misma carpeta con este nombre
             size_hint_y: 0.25
             allow_stretch: True
             keep_ratio: True
@@ -35,8 +28,8 @@ MDScreen:
             multiline: False
             readonly: True
             mode: "fill"
-            fill_color_normal: 0.95, 0.92, 0.88, 1    # Fondo beige claro
-            text_color_normal: 0, 0, 0, 1            # Números de la pantalla en NEGRO
+            fill_color_normal: 0.95, 0.92, 0.88, 1
+            text_color_normal: 0, 0, 0, 1
             text_color_focus: 0, 0, 0, 1
             size_hint_y: 0.15
             line_color_normal: 0, 0, 0, 0            
@@ -69,7 +62,7 @@ MDScreen:
                 on_release: app.agregar_caracter(")")
             MDFillRoundFlatButton:
                 text: "/"
-                md_bg_color: 0.9, 0.55, 0.2, 1    # Naranja
+                md_bg_color: 0.9, 0.55, 0.2, 1
                 text_color: "white"
                 font_size: "22sp"
                 on_release: app.agregar_caracter("/")
@@ -77,7 +70,7 @@ MDScreen:
             # Fila 2
             MDFillRoundFlatButton:
                 text: "7"
-                md_bg_color: 0.23, 0.18, 0.13, 1  # Café oscuro
+                md_bg_color: 0.23, 0.18, 0.13, 1
                 text_color: "white"
                 font_size: "22sp"
                 on_release: app.agregar_caracter("7")
@@ -181,15 +174,16 @@ MDScreen:
 
 class CalculadoraCapiApp(MDApp):
     def build(self):
-        # Desactivamos paletas automáticas para usar nuestros colores manuales
         self.theme_cls.theme_style = "Dark"
         return Builder.load_string(KV)
 
     def agregar_caracter(self, caracter):
         texto_actual = self.root.ids.pantalla.text
-        if texto_actual == "0" or texto_actual == "Capi-Error":
+        if (texto_actual == "0" or texto_actual == "Capi-Error") and caracter not in "+-*/)":
             self.root.ids.pantalla.text = caracter
         else:
+            if texto_actual == "Capi-Error":
+                return
             self.root.ids.pantalla.text = f"{texto_actual}{caracter}"
 
     def limpiar_pantalla(self):
